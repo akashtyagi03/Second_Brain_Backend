@@ -4,7 +4,8 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "ESNext",            // 👈 Change this
+    "module": "NodeNext",    
+    "moduleResolution": "nodenext",        // 👈 Change this
     "esModuleInterop": true, 
 
     // Environment Settings
