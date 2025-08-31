@@ -1,11 +1,13 @@
 import express from "express";
 import type {Express, Request, Response } from "express";
-import { UserSchema } from "./zod.js";
-import { User } from "./db.js";
+import { contentSchema, UserSchema } from "./zod";
+import { Content, User } from "./db";
 import jwt  from "jsonwebtoken";
-//@ts-ignore
-import { JWT_SECRET } from "./config";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { authMiddleware } from "./middleware";
+dotenv.config();
 
 const app: Express = express();
 app.use(express.json());
@@ -18,9 +20,10 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
     }   
 
     try{
-        const hashedpassword = await bcrypt.hash(password, 10);
+        const hashedpassword = await bcrypt.hash(password, 5);
         await User.create({ username, password: hashedpassword });
     }catch(error){
+        console.error('Error creating user:', error);
         return res.status(500).json({ error: "Internal server error" });
     }
     res.json({
@@ -28,55 +31,103 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
     })
 }); 
 
-app.post("/api/v1/signin", async(req, res) => {
+app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
     const { username, password } = req.body;
     const validate = UserSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
     }   
     try{
-        const user = await User.findOne({ username });
+        type usertype = {
+            _id: string,
+            username: string,
+            password: string
+        }| null;
+        const user: usertype = await User.findOne({ username });
         if (!user) {
             return res.status(400).json({ error: "Invalid username or password" });
         }
-        
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ error: "Invalid username or password" });
         }
-        const token = jwt.sign({userId: user._id}, JWT_SECRET);
+
+        const token = jwt.sign({userId: user._id}, typeof process.env.JWT_SECRET);
         res.json({
             message: "User signin successfully",
             token
         })
     } catch (error) {
+        console.error('Error creating user:', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 });
 
-app.post("api/v1/signup", async(req, res) => {
-    const { username, password } = req.body;
-    const validate = UserSchema.safeParse(req.body);
+app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+    // body must have link, title, tag
+    console.log("hihih")
+    const validate = contentSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
-    }   
+    }
 
-    await User.create({ username, password });
-    res.json({
-        message: "User created successfully"
-    })
-}); 
-app.post("api/v1/signup", async(req, res) => {
-    const { username, password } = req.body;
-    const validate = UserSchema.safeParse(req.body);
-    if (!validate.success) {
-        return res.status(400).json({ error: validate.error });
-    }   
-
-    await User.create({ username, password });
-    res.json({
-        message: "User created successfully"
-    })
+    try{
+        // @ts-ignore
+        const userId = req.userId;
+        await Content.create({ ...req.body, authorId: userId });
+        res.json({ message: "Content created successfully" });
+    }catch(error){
+        console.error('Error creating content:', error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
 }); 
 
-    
+
+app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+    // @ts-ignore
+    const userId = req.userId
+    try{
+        const contents = await Content.find({ authorId: userId });
+        res.json({ contents });
+    }catch(error){
+        console.error('Error fetching contents:', error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}); 
+
+app.delete("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+    // @ts-ignore
+    const userId = req.userId
+    const { contentId } = req.body
+    try{
+        const contents = await Content.findByIdAndDelete({ authorId: userId, _id: contentId });
+        res.json({ massage: "Content deleted successfully" });
+    }catch(error){
+        console.error('Error fetching contents:', error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}); 
+app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+    // @ts-ignore
+    const userId = req.userId
+    try{
+        const contents = await Content.find({ authorId: userId });
+        res.json({ contents });
+    }catch(error){
+        console.error('Error fetching contents:', error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}); 
+
+async function main(){
+    if (process.env.MONGODB_URL === undefined) {
+        throw new Error("MONGODB_URL is not defined");
+    }
+    await mongoose.connect(process.env.MONGODB_URL!);
+    app.listen(3000, () => {
+        console.log("Server is running on port 3000");
+    });
+}
+
+main()
