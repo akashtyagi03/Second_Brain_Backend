@@ -1,15 +1,16 @@
 import express from "express";
+import type {Express, Request, Response } from "express";
 import { UserSchema } from "./zod.js";
 import { User } from "./db.js";
 import jwt  from "jsonwebtoken";
-import { JWT_SECRET } from "./config.js";
+//@ts-ignore
+import { JWT_SECRET } from "./config";
 import bcrypt from "bcrypt";
-const app = express();
 
+const app: Express = express();
 app.use(express.json());
 
-
-app.post("/api/v1/signup", async(req, res) => {
+app.post("/api/v1/signup", async(req: Request, res: Response) => {
     const { username, password } = req.body;
     const validate = UserSchema.safeParse(req.body);
     if (!validate.success) {
@@ -38,7 +39,7 @@ app.post("/api/v1/signin", async(req, res) => {
         if (!user) {
             return res.status(400).json({ error: "Invalid username or password" });
         }
-
+        
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ error: "Invalid username or password" });
