@@ -1,3 +1,4 @@
+require('dotenv').config();     
 import express from "express";
 import type {Express, Request, Response } from "express";
 import { contentSchema, UserSchema } from "./zod";
@@ -42,7 +43,7 @@ app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
             _id: string,
             username: string,
             password: string
-        }| null;
+        } | null;
         const user: usertype = await User.findOne({ username });
         if (!user) {
             return res.status(400).json({ error: "Invalid username or password" });
@@ -66,23 +67,21 @@ app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
 
 app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // body must have link, title, tag
-    console.log("hihih")
+    const { link, title } = req.body;
     const validate = contentSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
     }
-
+    
     try{
         // @ts-ignore
-        const userId = req.userId;
-        await Content.create({ ...req.body, authorId: userId });
+        await Content.create({ link, title, userId: req.userId, tag: [] });
         res.json({ message: "Content created successfully" });
     }catch(error){
         console.error('Error creating content:', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }); 
-
 
 app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore

@@ -6,13 +6,13 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     if (!authHeader) {
         return res.status(401).json({ error: "Authorization header missing" });
     }
+    const token = authHeader.split(' ')[1];
     
     try {
-        const decoded = jwt.verify(authHeader as string, process.env.JWT_SECRET!);
-        console.log(decoded)    
+        const decoded = jwt.verify(token, typeof process.env.JWT_SECRET);
         // how to override the type of the express request object
         //@ts-ignore
-        req.userId = decoded.id;
+        req.userId = decoded.userId;
         next();
     } catch (error) {
         console.log(error)
