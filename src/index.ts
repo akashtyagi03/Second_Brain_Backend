@@ -83,11 +83,11 @@ app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) =
     }
 }); 
 
-app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
-    const userId = req.userId
+    const user_Id = req.userId
     try{
-        const contents = await Content.find({ authorId: userId });
+        const contents = await Content.find({ userId: user_Id });
         res.json({ contents });
     }catch(error){
         console.error('Error fetching contents:', error);
@@ -95,23 +95,24 @@ app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => 
     }
 }); 
 
-app.delete("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
-    const userId = req.userId
+    const user_Id = req.userId
     const { contentId } = req.body
     try{
-        const contents = await Content.findByIdAndDelete({ authorId: userId, _id: contentId });
-        res.json({ massage: "Content deleted successfully" });
+        const contents = await Content.findOneAndDelete({ userId: user_Id, _id: contentId });
+        res.json({ massage: "Content deleted successfully", contents });
     }catch(error){
         console.error('Error fetching contents:', error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }); 
-app.get("api/v1/content", authMiddleware, async(req: Request, res: Response) => {
+
+app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
-    const userId = req.userId
+    const user_Id = req.userId
     try{
-        const contents = await Content.find({ authorId: userId });
+        const contents = await Content.find({ userId: user_Id });
         res.json({ contents });
     }catch(error){
         console.error('Error fetching contents:', error);
