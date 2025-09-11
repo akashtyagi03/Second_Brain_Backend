@@ -2,12 +2,14 @@ require('dotenv').config();
 import express from "express";
 import type {Express, Request, Response } from "express";
 import { contentSchema, UserSchema } from "./zod";
-import { Content, User } from "./db";
+import { Content, sharedlinks, User } from "./db";
 import jwt  from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { authMiddleware } from "./middleware";
+import { generateHash } from "./utils";
+import { makeIssue } from "zod/v3";
 dotenv.config();
 
 const app: Express = express();
@@ -108,16 +110,41 @@ app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response)
     }
 }); 
 
-app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
-    // @ts-ignore
-    const user_Id = req.userId
-    try{
-        const contents = await Content.find({ userId: user_Id });
-        res.json({ contents });
-    }catch(error){
-        console.error('Error fetching contents:', error);
-        return res.status(500).json({ error: "Internal server error" });
+app.get("/api/v1/brain/share", authMiddleware, async(req: Request, res: Response) => {
+    const share = req.body.share;
+    if (share){
+        const hash = generateHash(10);
+        //@ts-ignore
+        await sharedlinks.create({ hash, user_Id: req.userId });
+        res.json({
+            massage: "Link created successfully",
+            hash
+        })
+    } else {
+        await sharedlinks.deleteOne({
+            //@ts-ignore
+            user_Id: req.userId
+        })
+        res.json({
+            massage: "Link deleted successfully",
+        })
     }
+});
+
+app.get("/api/v1/brain/:shareLink", async(req: Request, res: Response) => {
+    const hash = req.params.shareLink;
+
+    await sharedlinks.findOne({ hash }).then( async(link) => {
+        console.log(link)
+        if (!link) {
+            return res.status(404).json({ error: "Link not found" });
+        }
+        const contents = await Content.find({ userId: link.user_Id });
+        res.json({ contents });
+    }).catch((error) => {
+        console.error('Error fetching shared link:', error);
+        return res.status(500).json({ error: "Internal server error" });
+    })
 }); 
 
 async function main(){

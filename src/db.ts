@@ -13,5 +13,11 @@ const contentschema = new Schema({
     userId : {type: mongoose.Types.ObjectId, ref: "User", required: true},
 });
 
+const linkschema = new Schema({
+    hash: String,
+    user_Id : {type: mongoose.Types.ObjectId, ref: "User", required: true},
+})
+
+export const sharedlinks = model("sharedlinks", linkschema);
 export const User = model("User", userschema);
 export const Content = model("Content", contentschema); 
