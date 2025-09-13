@@ -9,7 +9,7 @@ const contentschema = new Schema({
     // type : {type:String, enum:["document", "tweet", "youtube", "link"]},
     title : String,
     link: String,
-    tag: [{types: mongoose.Types.ObjectId}],
+    types: String,
     userId : {type: mongoose.Types.ObjectId, ref: "User", required: true},
 });
 

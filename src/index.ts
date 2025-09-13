@@ -9,11 +9,12 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { authMiddleware } from "./middleware";
 import { generateHash } from "./utils";
-import { makeIssue } from "zod/v3";
+import cors from "cors";
 dotenv.config();
 
 const app: Express = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/api/v1/signup", async(req: Request, res: Response) => {
     const { username, password } = req.body;
@@ -68,8 +69,8 @@ app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
 });
 
 app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
-    // body must have link, title, tag
-    const { link, title } = req.body;
+    // body must have link, title
+    const { link, title, types } = req.body;
     const validate = contentSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
@@ -77,7 +78,7 @@ app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) =
     
     try{
         // @ts-ignore
-        await Content.create({ link, title, userId: req.userId, tag: [] });
+        await Content.create({ link, title, types, userId: req.userId});
         res.json({ message: "Content created successfully" });
     }catch(error){
         console.error('Error creating content:', error);

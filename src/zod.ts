@@ -9,5 +9,5 @@ export const contentSchema = z.object({
     // type: z.enum(["document", "tweet", "youtube", "link"]),
     link: z.string(),
     title: z.string().min(1).max(100),
-    tag: z.array(z.string().min(1).max(30)).optional(),
+    types: z.string(),
 });
