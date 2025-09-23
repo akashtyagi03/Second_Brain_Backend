@@ -16,6 +16,7 @@ const app: Express = express();
 app.use(express.json());
 app.use(cors());
 
+// signup End point
 app.post("/api/v1/signup", async(req: Request, res: Response) => {
     const { username, password } = req.body;
     const validate = UserSchema.safeParse(req.body);
@@ -35,6 +36,7 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
     })
 }); 
 
+// signin End point
 app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
     const { username, password } = req.body;
     const validate = UserSchema.safeParse(req.body);
@@ -68,6 +70,7 @@ app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
     }
 });
 
+// create content End point
 app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // body must have link, title
     const { link, title, types } = req.body;
@@ -86,6 +89,7 @@ app.post("/api/v1/content", authMiddleware, async(req: Request, res: Response) =
     }
 }); 
 
+// to get back all content End point 
 app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
     const user_Id = req.userId
@@ -98,6 +102,7 @@ app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) =>
     }
 }); 
 
+// delete any content End point
 app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
     const user_Id = req.userId
@@ -111,6 +116,7 @@ app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response)
     }
 }); 
 
+// shared link of brain End point
 app.get("/api/v1/brain/share", authMiddleware, async(req: Request, res: Response) => {
     const share = req.body.share;
     if (share){
@@ -132,6 +138,7 @@ app.get("/api/v1/brain/share", authMiddleware, async(req: Request, res: Response
     }
 });
 
+// get other brain content via shared link End point
 app.get("/api/v1/brain/:shareLink", async(req: Request, res: Response) => {
     const hash = req.params.shareLink;
 
