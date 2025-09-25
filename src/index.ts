@@ -118,7 +118,7 @@ app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response)
 
 // shared link of brain End point
 app.get("/api/v1/brain/share", authMiddleware, async(req: Request, res: Response) => {
-    const share = req.body.share;
+    const share = req.query.share;
     if (share){
         const hash = generateHash(10);
         //@ts-ignore
