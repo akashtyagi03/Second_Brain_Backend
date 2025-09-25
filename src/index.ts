@@ -139,11 +139,10 @@ app.get("/api/v1/brain/share", authMiddleware, async(req: Request, res: Response
 });
 
 // get other brain content via shared link End point
-app.get("/api/v1/brain/:shareLink", async(req: Request, res: Response) => {
+app.get("/api/v1/brain/:shareLink", authMiddleware, async(req: Request, res: Response) => {
     const hash = req.params.shareLink;
 
     await sharedlinks.findOne({ hash }).then( async(link) => {
-        console.log(link)
         if (!link) {
             return res.status(404).json({ error: "Link not found" });
         }
