@@ -26,14 +26,17 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
 
     try{
         const hashedpassword = await bcrypt.hash(password, 5);
-        await User.create({ username, password: hashedpassword });
+        const user = await User.create({ username, password: hashedpassword });
+
+        const token = jwt.sign({userId: user._id}, typeof process.env.JWT_SECRET);
+        res.json({
+            message: "User signin successfully",
+            token
+        })
     }catch(error){
         console.error('Error creating user:', error);
         return res.status(500).json({ error: "Internal server error" });
     }
-    res.json({
-        message: "User created successfully"
-    })
 }); 
 
 // signin End point
