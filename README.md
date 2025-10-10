@@ -20,8 +20,8 @@ This backend has APIs that let users sign up/login securely and store, fetch, de
 
 ```bash
 # Clone the backend repository
-git clone https://github.com/<your-username>/second_brain_backend.git
-cd second_brain_backend
+git clone https://github.com/akashtyagi03/Second_Brain_Backend.git
+cd Second_Brain_Backend
 
 # Install dependencies
 npm install
