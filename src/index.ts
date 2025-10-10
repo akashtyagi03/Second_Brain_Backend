@@ -1,7 +1,7 @@
 require('dotenv').config();     
 import express from "express";
 import type {Express, Request, Response } from "express";
-import { contentSchema, UserSchema } from "./zod";
+import { contentSchema, SigninSchema, UserSchema } from "./zod";
 import { Content, sharedlinks, User } from "./db";
 import jwt  from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -18,7 +18,7 @@ app.use(cors());
 
 // signup End point
 app.post("/api/v1/signup", async(req: Request, res: Response) => {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     const validate = UserSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
@@ -26,7 +26,7 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
 
     try{
         const hashedpassword = await bcrypt.hash(password, 5);
-        const user = await User.create({ username, password: hashedpassword });
+        const user = await User.create({ username, email, password: hashedpassword });
 
         const token = jwt.sign({userId: user._id}, typeof process.env.JWT_SECRET);
         res.json({
@@ -41,18 +41,18 @@ app.post("/api/v1/signup", async(req: Request, res: Response) => {
 
 // signin End point
 app.post("/api/v1/signin", async(req: Request, res: Response    ) => {
-    const { username, password } = req.body;
-    const validate = UserSchema.safeParse(req.body);
+    const { email, password } = req.body;
+    const validate = SigninSchema.safeParse(req.body);
     if (!validate.success) {
         return res.status(400).json({ error: validate.error });
     }   
     try{
         type usertype = {
             _id: string,
-            username: string,
+            email: string,
             password: string
         } | null;
-        const user: usertype = await User.findOne({ username });
+        const user: usertype = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ error: "Invalid username or password" });
         }
