@@ -105,14 +105,19 @@ app.get("/api/v1/content", authMiddleware, async(req: Request, res: Response) =>
     }
 }); 
 
-// delete any content End point
+// delete content End point
 app.delete("/api/v1/content", authMiddleware, async(req: Request, res: Response) => {
     // @ts-ignore
     const user_Id = req.userId
-    const { contentId } = req.body
+    const { contentId } = req.body;
     try{
         const contents = await Content.findOneAndDelete({ userId: user_Id, _id: contentId });
-        res.json({ massage: "Content deleted successfully", contents });
+        if (!contents) {
+            return res.status(404).json({ 
+                error: "Content not found or you do not have permission to delete it." 
+            });
+        }
+        res.json({ massage: "Content deleted successfully", contents: contents });
     }catch(error){
         console.error('Error fetching contents:', error);
         return res.status(500).json({ error: "Internal server error" });
