@@ -6,11 +6,12 @@ const userschema = new Schema({
     password: { type: String, required: true },
 });
 
+const contenttype = ["Document", "tweet", "youtube", "link", "image", "video"]
 const contentschema = new Schema({
-    // type : {type:String, enum:["document", "tweet", "youtube", "link"]},
-    title : String,
-    link: String,
-    types: String,
+    title : {type:String, require:true},
+    link: {type:String, require:true},
+    // enum retrict the value of the field , so that user can only select contenttype option
+    types: {type:String, enum:contenttype, require:true},
     userId : {type: mongoose.Types.ObjectId, ref: "User", required: true},
 });
 

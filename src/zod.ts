@@ -12,7 +12,7 @@ export const SigninSchema = z.object({
 });
 
 export const contentSchema = z.object({
-    // type: z.enum(["document", "tweet", "youtube", "link"]),
+    // type: z.enum(["Document", "tweet", "youtube", "link"]),
     link: z.string(),
     title: z.string().min(1).max(100),
     types: z.string(),

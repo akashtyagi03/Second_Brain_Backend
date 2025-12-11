@@ -163,10 +163,6 @@ app.get("/api/v1/brain/:shareLink", async(req: Request, res: Response) => {
     })
 }); 
 
-app.post("/content",(req: Request, res: Response)=>{
-
-})
-
 async function main(){
     if (process.env.MONGODB_URL === undefined) {
         throw new Error("MONGODB_URL is not defined");
