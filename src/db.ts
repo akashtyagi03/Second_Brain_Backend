@@ -6,7 +6,7 @@ const userschema = new Schema({
     password: { type: String, required: true },
 });
 
-const contenttype = ["Document", "tweet", "youtube", "link", "image", "video"]
+const contenttype = ["Document", "twitter", "youtube", "link", "image", "video"]
 const contentschema = new Schema({
     title : {type:String, require:true},
     link: {type:String, require:true},
